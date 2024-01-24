@@ -36,7 +36,7 @@
             let initialDate = Intl.NumberFormat('en-US', { minimumIntegerDigits: 2 }).format(6 + parseInt(index));
             let dateString = `2013-11-${initialDate}`;
 
-            var jsonData = fetchJson(dateString);
+            var jsonData = await fetchJson(dateString);
 
             // console.log(dateString);
             //This example renders a scatterplot with DeckGL, on top of a basemap rendered with mapboxgl, using a map style JSON from Carto.
