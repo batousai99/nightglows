@@ -54,7 +54,7 @@
                         // data: 'region8_brightness.json',
                         data: jsonData,
                         getPosition: d => [d.longitude, d.latitude], //display if slider is 
-                        getWeight: d => d.date.includes(dateString) ? Math.floor(d.absolute_brightness) : 0,
+                        getWeight: d => d.absolute_brightness,
                         // colorDomain: [10.0, 100.0],
                         aggregation: 'SUM',
                         radiusPixels: 150,
