@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <!-- optional if mapbox base map is needed -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet' />
+    <!-- Allow the map to render in full screen  -->
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #map-legend {
+            position: sticky;
+            top: 50px;
+            right: 50px;
+            width: 250px;
+            height: 300px;
+            float: right;
+            background-color: rgba(255, 0, 0, 0.3);
+            z-index: 5;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map-legend">
+        <input id="date-slide" type="range" min="0" max="4" step="1" value="0" oninput="renderLayer(this.value);">
+    </div>
+    <script>
+        function renderLayer(index) {
+            let initialDate = Intl.NumberFormat('en-US', { minimumIntegerDigits: 2 }).format(6 + parseInt(index));
+            let dateString = `2013-11-${initialDate}`;
+
+            console.log(dateString);
+
+            //This example renders a scatterplot with DeckGL, on top of a basemap rendered with mapboxgl, using a map style JSON from Carto.
+            new deck.DeckGL({
+                mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+                initialViewState: {
+                    longitude: 124.76,
+                    latitude: 10.96,
+                    zoom: 10
+                },
+                controller: true,
+                layers: [
+                    new deck.HeatmapLayer({
+                        id: 'heatmapLayer',
+                        data: 'region8_brightness.json',
+                        getPosition: d => [d.longitude, d.latitude], //display if slider is 
+                        getWeight: d => d.date.includes(dateString) ? Math.floor(d.absolute_brightness) : 0,
+                        // colorDomain: [10.0, 100.0],
+                        aggregation: 'SUM',
+                        radiusPixels: 150,
+                    }),
+                    // new deck.ContourLayer({
+                    //     id: 'ContourLayer',
+                    //     // opacity: d.date.includes(dateString)? 1 : 0,
+                    //     data: 'region8_brightness.json',
+                    //     cellSize: 1000,
+                    //     contours: [
+                    //         { threshold: 1, color: [decToHex(d.absolute_brightness), decToHex(d.absolute_brightness), decToHex(d.absolute_brightness)], strokeWidth: 1, zIndex: 1 },
+                    //     ],
+                    //     getPosition: d => d.date.includes(dateString)? [d.longitude, d.latitude] : [0,0], //display if slider is 
+                    // })
+                ]
+            });
+        }
+
+        function decToHex(dec) {
+            // const part = Math.floor(dec * 255).toString(16)
+            //return `#${part}${part}${part}`
+            return Math.floor(dec * 255).toString(16);
+        }
+
+        async function fetchJson(relativePath) {
+            try {
+                const response = await fetch(relativePath);
+
+                if (!response.ok) {
+                    throw new Error(`Error fetching JSON file: ${response.statusText}`);
+                }
+
+                const jsonData = await response.json();
+                return jsonData;
+            } catch (error) {
+                console.error(error.message);
+                return null;
+            }
+        }
+
+        // renderLayer(0);
+
+        // document.load(function () {
+        //     renderLayer(0);
+        // });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderLayer(0);
+        });
+    </script>
+</body>
+
+</html>
