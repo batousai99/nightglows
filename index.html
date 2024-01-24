@@ -32,11 +32,12 @@
         <input id="date-slide" type="range" min="0" max="4" step="1" value="0" oninput="renderLayer(this.value);">
     </div>
     <script>
+        var jsonDataArray = [];
         async function renderLayer(index) {
             let initialDate = Intl.NumberFormat('en-US', { minimumIntegerDigits: 2 }).format(6 + parseInt(index));
             let dateString = `2013-11-${initialDate}`;
 
-            var jsonData = await fetchJson(dateString);
+            var jsonData = jsonDataArray.filter((region)=>region.date.includes(dateString)); // await fetchJson(dateString);
 
             // console.log(dateString);
             //This example renders a scatterplot with DeckGL, on top of a basemap rendered with mapboxgl, using a map style JSON from Carto.
@@ -79,7 +80,7 @@
             return Math.floor(dec * 255).toString(16);
         }
 
-        async function fetchJson(dateString) {
+        async function fetchJson() {
             try {
                 const response = await fetch('region8_brightness.json');
 
@@ -88,8 +89,8 @@
                 }
 
                 const jsonData = await response.json();
-
-                return jsonData.filter((region)=>region.date.includes(dateString));
+                return jsonData;
+                // return jsonData.filter((region)=>region.date.includes(dateString));
             } catch (error) {
                 console.error(error.message);
                 return null;
@@ -102,7 +103,8 @@
         //     renderLayer(0);
         // });
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            jsonDataArray = await fetchJson(); 
             renderLayer(0);
         });
     </script>
